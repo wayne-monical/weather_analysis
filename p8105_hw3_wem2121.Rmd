@@ -5,6 +5,8 @@ date: "2024-10-10"
 output: github_document
 ---
 
+## Problem 1
+
 ```{r}
 library(tidyverse)
 library(p8105.datasets)
@@ -12,10 +14,102 @@ data("ny_noaa")
 ```
 
 
+The `ny_noaa` data set has `r ncol(ny_noaa)` columns and `r nrow(ny_noaa)` rows. Each observation comes with an ID given by the `id` variable. Each observation has a date, along with several precipitation and temperature measurements. 
 
-The `ny_noaa` data set has `r ncol(ny_noaa)` columns and `r nrow(ny_noaa)` rows.
+
+
+We begin with data cleaning by creating separate numeric variables for year, month, and day. 
 
 ```{r}
-ny_noaa
+ny_noaa=
+  ny_noaa |> 
+  mutate(
+    year = ny_noaa |> pull(date) |> year(),
+    month= ny_noaa |> pull(date) |> month(),
+    day= ny_noaa |> pull(date) |> day()
+  )
 ```
+
+Using these new variables, we find that we have observations from `r min(pull(ny_noaa, year))` to `r max(pull(ny_noaa, year))`.
+
+
+
+Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
+
+
+Looking at the data's description at https://p8105.com/dataset_noaa.html, we can find that the precipitation is given in tenths of millimeters, snowfall and snow depth are given in millimeters, and maximum and minimum temperature are given in tenths of degrees Celsius. Therefore we can adjust the columns to make each column in whole millimeters or whole degrees Celsius. 
+```{r}
+ny_noaa = 
+  ny_noaa |> 
+  mutate(
+    prcp = ny_noaa$prcp / 10,
+    tmin = as.numeric(ny_noaa$tmin) / 10,
+    tmax = as.numeric(ny_noaa$tmax) / 10)
+```
+
+There is also a single observation with negative snowfall, with ID USC00307400 on June 15th, 2005. 
+```{r}
+ny_noaa |> filter(snow < 0)
+```
+
+Given that New York typically does not receive snowfall in June, this value is likely meant to be zero. However, the temperature values are both within two standard deviations of the average temperature for June, so I do not believe that this observation need be thrown out. 
+
+```{r}
+ny_noaa |> 
+  filter(month == 6) |> 
+  drop_na(tmin, tmax) |> 
+  summarise(
+    mean_june_tmin = mean(tmin),
+    sd_june_tmin = sd(tmin),
+    mean_june_tmax = mean(tmax),
+    sd_june_tmax = sd(tmax))
+```
+```{r}
+ny_noaa =
+  ny_noaa |> 
+  mutate(snow = ifelse(id == 'USC00307400', 0, snow))
+```
+
+
+However, even after correcting the units to millimeters, the daily precipitation, snowfall, and snow depth have overly large maximum values. The maximum snowfall for New York City was recorded as 693 millimeters according to https://www.currentresults.com/Yearly-Weather/USA/NY/New-York-City/extreme-annual-new-york-city-snowfall.php
+```{r}
+ny_noaa |> 
+  select(prcp, snow, snwd) |> 
+  summary()
+```
+
+```{r}
+hist(ny_noaa$tmin)
+```
+
+
+
+```{r}
+summary(ny_noaa$tmax)
+```
+
+
+```{r}
+plot(ny_noaa$tmin, ny_noaa$snow)
+```
+
+
+```{r}
+summary(ny_noaa$snow)
+```
+
+
+```{r}
+summary(ny_noaa$snwd)
+```
+
+
+
+```{r}
+summary(ny_noaa)
+```
+
+
+
+
 
