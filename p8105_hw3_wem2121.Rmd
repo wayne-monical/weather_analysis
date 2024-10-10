@@ -71,17 +71,65 @@ ny_noaa =
 ```
 
 
-However, even after correcting the units to millimeters, the daily precipitation, snowfall, and snow depth have overly large maximum values. The maximum snowfall for New York City was recorded as 693 millimeters according to https://www.currentresults.com/Yearly-Weather/USA/NY/New-York-City/extreme-annual-new-york-city-snowfall.php
+However, even after correcting the units to millimeters, the daily precipitation, snowfall, and snow depth have overly large maximum values. The maximum snowfall for New York City was recorded as 693 millimeters on January 23, 2016 according to [this website](https://www.currentresults.com/Yearly-Weather/USA/NY/New-York-City/extreme-annual-new-york-city-snowfall.php).
 ```{r}
 ny_noaa |> 
   select(prcp, snow, snwd) |> 
   summary()
 ```
 
+
+The most common values for snowfall are zero, 25, 13, and 51. I suspect that this is because they are converting from inches and rounding to the nearest millimeter. This is because there are 25.4 millimeters in an inch. So half of one inch corresponds to 13 millimeters, one inch corresponds to 25 millimeters, and two inches corresponds to 51 millimeters, which we see are the most common values. 
+
 ```{r}
-hist(ny_noaa$tmin)
+ny_noaa |> 
+  count(snow) |> 
+  arrange(desc(n)) |> 
+  head(5)
+```
+Below I have made two graphs comparing the daily maximum temperature to the minimum temperature. The first graph is a two dimensional histogram. We can see that there may be a positive relationship between minimum and maximum temperature. 
+
+```{r}
+ny_noaa |> 
+  drop_na(tmin, tmax) |> 
+  ggplot(aes(x = tmin, y = tmax)) +
+  geom_bin_2d()
 ```
 
+The next graph is a histogram faceted based on temperature statistic: minimum or maximum. It allows us to compare the two populations, but we have lost the information on which readings are on the same day. 
+```{r}
+ny_noaa |> 
+  drop_na(tmin, tmax) |> 
+  pivot_longer(
+    cols = c('tmin', 'tmax'),
+    names_to = 'temp_stat',
+    values_to = 'temp_value') |> 
+  ggplot(aes(x = temp_value)) +
+  facet_grid(temp_stat~.)+
+  geom_histogram()
+```
+
+
+
+```{r}
+ny_noaa |> 
+  filter(snow > 0, snow < 100) |> 
+  ggplot(aes(x = snow, color = year)) +
+  geom_histogram()
+```
+
+
+```{r}
+ny_noaa |> 
+  count(snow) |> 
+  arrange(desc(n)) |> 
+  head(5)
+```
+
+
+```{r}
+most_common_categories
+```
 
 
 ```{r}
