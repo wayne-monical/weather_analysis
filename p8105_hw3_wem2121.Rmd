@@ -1,0 +1,21 @@
+---
+title: "Homework 3"
+author: "Wayne Monical wem2121"
+date: "2024-10-10"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+library(p8105.datasets)
+data("ny_noaa")
+```
+
+
+
+The `ny_noaa` data set has `r ncol(ny_noaa)` columns and `r nrow(ny_noaa)` rows.
+
+```{r}
+ny_noaa
+```
+
