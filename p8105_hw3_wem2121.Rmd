@@ -219,20 +219,103 @@ nhanes |>
   
 ```
 
+Aggregating instead by hour of the day, we see very similar activity levels across sex and education. Activity increases from the fifth hour to the tenth, where it gradually decreases until the twentieth hour, where it drops off steeply. This pattern is affirmed by humans' typically sleep cycle. 
+
 ```{r}
-nhanes
+nhanes |> 
+  mutate(
+    hour = floor(minute / 60)
+  ) |> 
+  group_by(
+    seqn, sex, age, education, hour
+  ) |> 
+  summarize(hourly_activity = sum(acceleration)) |> 
+  ggplot(aes(x = hour, y = hourly_activity, color = sex)) +
+  facet_grid(.~education) +
+  geom_point(alpha = 0.1) +
+  geom_smooth()
+  
 ```
 
 
+## Problem 3
+
+Loading Citibike data, we import the four data frames from each of the four months. We add additional variables specifying the year and month of data collection, then combine them all. We also rename the `customer_type` variable for clarity, and we set the month names and weekdays as ordered factors so that they appear in the order as expected during tabling and graphing.  
 
 ```{r}
-nhanes
+
+citi = list(
+    mutate(
+      read_csv('data/Jan 2020 Citi.csv',
+               show_col_types = FALSE),
+      month = 'January', year = 2020),
+    mutate(
+      read_csv('data/July 2020 Citi.csv',
+               show_col_types = FALSE),
+      month = 'July', year = 2020),
+    mutate(
+      read_csv('data/Jan 2024 Citi.csv',
+               show_col_types = FALSE),
+      month = 'January', year = 2024),
+    mutate(
+      read_csv('data/July 2024 Citi.csv',
+               show_col_types = FALSE),
+      month = 'July', year = 2024)
+) |> bind_rows() |> 
+  mutate(
+    customer_type = member_casual,
+    month = factor(month, levels = c('January', 'July')),
+    weekdays = factor(weekdays, levels = 
+                        c('Monday', 'Tuesday', 'Wednesday', 
+                          'Thursday', 'Friday', 'Saturday',
+                          'Sunday')),
+    year = factor(year)
+  )
+```
+
+Here we produce a reader-friendly table showing the total number of rides in each combination of year, month, and membership. From the table, we can see that there is far more member ridership than non-member ridership, especially in the month of January 2020. We can also see that there is more ridership in July than in January. This difference is explainable by rider preference for fair weather. 
+```{r}
+citi |> 
+  group_by(year, month, customer_type) |> 
+  summarise(ride_count = n()) |> 
+  pivot_wider(
+    names_from = customer_type,
+    values_from = ride_count
+  ) |> 
+  knitr::kable(
+    col.names = c('Year', 'Month', 'Non-member Ride Count', 'Member Ride Count'))
 ```
 
 
-```{r}
+Next we investigate the most popular starting stations in July of 2024. 
 
+```{r}
+citi |> 
+  filter(year == 2024, month == 'July') |> 
+  group_by(start_station_name) |> 
+  summarise(ride_count = n()) |> 
+  arrange(desc(ride_count)) |> 
+  head(5) |> 
+  knitr::kable(col.names = c('Starting Station', 'Ride Count'))
+```
+Next we investigate the effect of day of the week, month, and year on median ride duration. 
+```{r}
+citi |> 
+  group_by(weekdays, month, year) |> 
+  summarise(Median_Duration = median(duration)) |> 
+  ggplot(aes(x = month, fill = weekdays, y = Median_Duration))+
+  facet_grid(year ~ . ) +
+  geom_bar(position = 'dodge', stat = 'identity')
 ```
 
+Next we investigate the effect of month, customer type, and bike type ride duration in 2024. Since very few rides are longer than 75 minutes, we filter for rides under 75 minutes long. We then create a four panel graph, faceting by customer type and month. We have used color to show the difference between each bike type. We have normalized each histogram. From the graph, we can see that electric bikes are used less than their human-powered counterparts across month and customer type. This could be due to the the persistent unavailability of electric bikes or consumer choice against electric bikes due to safety, cost, and docking concerns. 
+```{r}
+citi |> 
+  filter(year == 2024, duration < 75) |> 
+  ggplot(aes(x = duration, fill = rideable_type))+
+  facet_grid(customer_type ~ month) +
+  geom_histogram(aes(y = ..density..)) 
+
+```
 
 
