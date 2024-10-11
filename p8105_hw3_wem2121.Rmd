@@ -111,53 +111,6 @@ ny_noaa |>
 
 
 
-```{r}
-ny_noaa |> 
-  filter(snow > 0, snow < 100) |> 
-  ggplot(aes(x = snow, color = year)) +
-  geom_histogram()
-```
 
-
-```{r}
-ny_noaa |> 
-  count(snow) |> 
-  arrange(desc(n)) |> 
-  head(5)
-```
-
-
-```{r}
-most_common_categories
-```
-
-
-```{r}
-summary(ny_noaa$tmax)
-```
-
-
-```{r}
-plot(ny_noaa$tmin, ny_noaa$snow)
-```
-
-
-```{r}
-summary(ny_noaa$snow)
-```
-
-
-```{r}
-summary(ny_noaa$snwd)
-```
-
-
-
-```{r}
-summary(ny_noaa)
-```
-
-
-
-
+## Problem 2
 
