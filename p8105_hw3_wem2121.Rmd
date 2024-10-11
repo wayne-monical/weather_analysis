@@ -127,6 +127,8 @@ ny_noaa |>
 
 ## Problem 2
 
+### Loading and Cleaning Data
+
 Here we load the data. The acceleration data comes in a wide format. We pivot the data to be longer in order to tidy it. We also transform the minute data to be numeric. We import the covariates data set and find that it is already tidy. 
 ```{r}
 accel = 
@@ -151,7 +153,7 @@ We check for missing data, and find the ID for each individual, `seqn1`, agrees.
 anti_join(covar, accel)
 ```
 
-Finally, we join together the data, and filter for participants of at least 21 years of age, full demographic data, and encode the qualitative variables as character strings
+Finally, we join together the data, and filter for participants of at least 21 years of age, full demographic data, and encode the qualitative variables as factors of character strings.
 
 ```{r}
 nhanes = 
@@ -159,9 +161,43 @@ nhanes =
   filter(age >= 21) |> 
   drop_na(sex, age, bmi, education) |> 
   mutate(
-    sex = if_else(sex == 1, 'male', 'female'), 
-    
+    sex = 
+      factor(
+        case_when(
+          sex == 1 ~ 'male', 
+          sex == 2 ~ 'female',
+          !(sex %in% c(1,2)) ~ NA 
+        )
+      ),
+    education = 
+      factor(
+       case_when(
+         education == 1 ~ "less than high school",
+         education == 2 ~ "high school equivalent",
+         education == 3 ~ "more than high school",
+         !(education %in% c(1,2, 3)) ~ NA 
+       )
+        )
   )
+```
+
+
+### Making Tables
+
+```{r}
+nhanes |> 
+  group_by(sex, education) |> 
+  summarize(count = n()) |>
+  pivot_wider(
+    names_from = sex, 
+    values_from = count
+    ) |> 
+  knitr::kable()
+```
+
+
+```{r}
+nhanes
 ```
 
 
