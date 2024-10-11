@@ -110,7 +110,70 @@ ny_noaa |>
 ```
 
 
+Next we create a plot showing the distribution of snowfall values greater than 0 millimeters and less than 100 millimeters in yeas of 2001 to 2004. 
+
+```{r}
+ny_noaa |> 
+  filter(
+    snow > 0,
+    snow < 100,
+    year %in% c(2001, 2002, 2003, 2004)
+    ) |> 
+  ggplot(aes(x = snow)) + 
+  geom_histogram() + 
+  facet_grid(rows = year~.)
+```
 
 
 ## Problem 2
+
+Here we load the data. The acceleration data comes in a wide format. We pivot the data to be longer in order to tidy it. We also transform the minute data to be numeric. We import the covariates data set and find that it is already tidy. 
+```{r}
+accel = 
+  read_csv('data/nhanes_accel.csv') |> 
+  janitor::clean_names() |> 
+  pivot_longer(
+    cols = min1:min1440,
+    names_to = 'minute',
+    names_prefix = 'min',
+    values_to = 'acceleration'
+  ) |> 
+  mutate(minute = as.numeric(minute))
+
+covar = 
+  read_csv('data/nhanes_covar.csv', skip = 4) |> 
+  janitor::clean_names()
+```
+
+
+We check for missing data, and find the ID for each individual, `seqn1`, agrees. 
+```{r}
+anti_join(covar, accel)
+```
+
+Finally, we join together the data, and filter for participants of at least 21 years of age, full demographic data, and encode the qualitative variables as character strings
+
+```{r}
+nhanes = 
+  inner_join(covar, accel) |> 
+  filter(age >= 21) |> 
+  drop_na(sex, age, bmi, education) |> 
+  mutate(
+    sex = if_else(sex == 1, 'male', 'female'), 
+    
+  )
+```
+
+
+
+```{r}
+nhanes
+```
+
+
+```{r}
+
+```
+
+
 
