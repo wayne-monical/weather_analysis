@@ -164,19 +164,25 @@ nhanes =
     sex = 
       factor(
         case_when(
-          sex == 1 ~ 'male', 
-          sex == 2 ~ 'female',
+          sex == 1 ~ 'Male', 
+          sex == 2 ~ 'Female',
           !(sex %in% c(1,2)) ~ NA 
-        )
+        ),
+        levels = c('Male', 'Female')
       ),
     education = 
       factor(
        case_when(
-         education == 1 ~ "less than high school",
-         education == 2 ~ "high school equivalent",
-         education == 3 ~ "more than high school",
+         education == 1 ~ "Less than High School",
+         education == 2 ~ "High School Equivalent",
+         education == 3 ~ "More than High School",
          !(education %in% c(1,2, 3)) ~ NA 
-       )
+       ),
+       levels = c(
+         'Less than High School', 
+         'High School Equivalent',
+         "More than High School"
+         )
         )
   )
 ```
@@ -184,8 +190,12 @@ nhanes =
 
 ### Making Tables
 
+Next, we make a reader-friendly table comparing sex to educational attainment. We accomplish this by selecting for the relevant rows, dropping duplicate rows, grouping our data by sex and education, counting the observations, then formatting the table to be readable. From the table, we can see that there are approximately the same number of men and women in the study that have less than a high school education and more than a high school education. There are more men than women with a high school education. 
+
 ```{r}
 nhanes |> 
+  select(seqn, sex, education) |> 
+  distinct() |> 
   group_by(sex, education) |> 
   summarize(count = n()) |>
   pivot_wider(
@@ -195,6 +205,19 @@ nhanes |>
   knitr::kable()
 ```
 
+Aggregating our data across all minutes in the day, we can plot the total activity separated by age, sex, and education. While we cannot draw any definitive conclusions without statistical tests, it appears that activity has a general downward relationship with age across sex and education. Among the high school educated and further, female study participants had an overall higher level of activity than their male counterparts. 
+```{r}
+nhanes |> 
+  group_by(
+    seqn, sex, age, education
+  ) |> 
+  summarize(total_activity = sum(acceleration)) |> 
+  ggplot(aes(x = age, y = total_activity, color = sex)) +
+  facet_grid(.~education) +
+  geom_point() +
+  geom_smooth()
+  
+```
 
 ```{r}
 nhanes
