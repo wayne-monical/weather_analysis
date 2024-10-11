@@ -32,11 +32,6 @@ ny_noaa=
 
 Using these new variables, we find that we have observations from `r min(pull(ny_noaa, year))` to `r max(pull(ny_noaa, year))`.
 
-
-
-Ensure observations for temperature, precipitation, and snowfall are given in reasonable units. For snowfall, what are the most commonly observed values? Why?
-
-
 Looking at the data's description at https://p8105.com/dataset_noaa.html, we can find that the precipitation is given in tenths of millimeters, snowfall and snow depth are given in millimeters, and maximum and minimum temperature are given in tenths of degrees Celsius. Therefore we can adjust the columns to make each column in whole millimeters or whole degrees Celsius. 
 ```{r}
 ny_noaa = 
@@ -71,7 +66,7 @@ ny_noaa =
 ```
 
 
-However, even after correcting the units to millimeters, the daily precipitation, snowfall, and snow depth have overly large maximum values. The maximum snowfall for New York City was recorded as 693 millimeters on January 23, 2016 according to [this website](https://www.currentresults.com/Yearly-Weather/USA/NY/New-York-City/extreme-annual-new-york-city-snowfall.php).
+However, even after correcting the units to millimeters, the daily precipitation, snowfall, and snow depth have overly large maximum values. The maximum snowfall for New York City was recorded as 693 millimeters on January 23, 2016 according to [this website](https://www.currentresults.com/Yearly-Weather/USA/NY/New-York-City/extreme-annual-new-york-city-snowfall.php). I do not see a clear cause of this issue. Errors in data collection, such as the negative snowfall variable, could be at fault. I would like to ask the data collector about these values. If I could not do that, I would simply discard any values over NYC's recorded maximum. 
 ```{r}
 ny_noaa |> 
   select(prcp, snow, snwd) |> 
@@ -93,10 +88,13 @@ Below I have made two graphs comparing the daily maximum temperature to the mini
 ny_noaa |> 
   drop_na(tmin, tmax) |> 
   ggplot(aes(x = tmin, y = tmax)) +
-  geom_bin_2d()
+  geom_bin_2d()+ 
+  labs(title = 'NYC Minimum and Maximum Daily Temperatures')+
+  xlab('Minimum Daily Temperature') +
+  ylab('Maximum Daily Temperature')
 ```
 
-The next graph is a histogram faceted based on temperature statistic: minimum or maximum. It allows us to compare the two populations, but we have lost the information on which readings are on the same day. 
+The next graph is a histogram faceted based on temperature statistic: minimum or maximum. It allows us to compare the two populations, but we have lost the information on which readings are on the same day. It is worth noting that these distributions are not close to normal. 
 ```{r}
 ny_noaa |> 
   drop_na(tmin, tmax) |> 
@@ -113,7 +111,7 @@ ny_noaa |>
 ```
 
 
-Next we create a plot showing the distribution of snowfall values greater than 0 millimeters and less than 100 millimeters in yeas of 2001 to 2004. 
+Next we create a plot showing the distribution of snowfall values greater than 0 millimeters and less than 100 millimeters in yeas of 2001 to 2004. As we previously observed, the measurements are biased towards increments of one-quarter inches. Therefore, I have specified the histogram's bins to match. 
 
 ```{r}
 ny_noaa |> 
@@ -123,7 +121,7 @@ ny_noaa |>
     year %in% c(2001, 2002, 2003, 2004)
     ) |> 
   ggplot(aes(x = snow)) + 
-  geom_histogram() + 
+  geom_histogram(binwidth = 25) + 
   facet_grid(rows = year~.)+ 
   labs(title = 'NYC Snowfall by Year')+
   xlab('Snowfall in Millimeters') +
@@ -135,7 +133,7 @@ ny_noaa |>
 
 ### Loading and Cleaning Data
 
-Here we load the data. The acceleration data comes in a wide format. We pivot the data to be longer in order to tidy it. We also transform the minute data to be numeric. We import the covariates data set and find that it is already tidy. 
+Here we load the NHANES acceleration data. The acceleration data comes in a wide format. We pivot the data to be longer in order to tidy it. We also transform the minute data to be numeric. We import the covariates data set and find that it is already tidy. 
 ```{r}
 accel = 
   read_csv('data/nhanes_accel.csv') |> 
@@ -154,7 +152,7 @@ covar =
 ```
 
 
-We check for missing data, and find the ID for each individual, `seqn1`, agrees. 
+We check for missing data, and find the ID for each individual, `seqn`, agrees. 
 ```{r}
 anti_join(covar, accel)
 ```
@@ -241,7 +239,7 @@ nhanes |>
   facet_grid(.~education) +
   geom_point(alpha = 0.1) +
   geom_smooth()+ 
-  scale_y_continuous(limits = c(0, 2000))+ 
+  scale_y_continuous(limits = c(0, 1500))+ 
   labs(title = 'Hourly Acitivity by Education and Sex')
   
 ```
@@ -307,7 +305,7 @@ citi |>
   head(5) |> 
   knitr::kable(col.names = c('Starting Station', 'Ride Count'))
 ```
-Next we investigate the effect of day of the week, month, and year on median ride duration. 
+Next we investigate the effect of day of the week, month, and year on median ride duration. Firstly, we can see that median ride duration is shorter in 2024 than it is in 2020. This could be due to rider choice changing, or the availability of additional docking stations, allowing riders to take shorter rides. We can also see that ride duration is typically longer during the month of July, likely due to rider preference for fair weather. Across all months and years, we see a slight uptick in the duration of rides as the week goes on, with the largest median rides occurring on Saturday and Sunday. 
 ```{r}
 citi |> 
   group_by(weekdays, month, year) |> 
