@@ -106,7 +106,10 @@ ny_noaa |>
     values_to = 'temp_value') |> 
   ggplot(aes(x = temp_value)) +
   facet_grid(temp_stat~.)+
-  geom_histogram()
+  geom_histogram()+ 
+  labs(title = 'NYC Minimum and Maximum Temperatures')+
+  xlab('Temperature in Degrees Celsius') +
+  ylab('Count of Observations')
 ```
 
 
@@ -121,7 +124,10 @@ ny_noaa |>
     ) |> 
   ggplot(aes(x = snow)) + 
   geom_histogram() + 
-  facet_grid(rows = year~.)
+  facet_grid(rows = year~.)+ 
+  labs(title = 'NYC Snowfall by Year')+
+  xlab('Snowfall in Millimeters') +
+  ylab('Count of Observations')
 ```
 
 
@@ -215,11 +221,12 @@ nhanes |>
   ggplot(aes(x = age, y = total_activity, color = sex)) +
   facet_grid(.~education) +
   geom_point() +
-  geom_smooth()
+  geom_smooth()+ 
+  labs(title = 'Total Daily Acitivity by Age, Education, and Sex')
   
 ```
 
-Aggregating instead by hour of the day, we see very similar activity levels across sex and education. Activity increases from the fifth hour to the tenth, where it gradually decreases until the twentieth hour, where it drops off steeply. This pattern is affirmed by humans' typically sleep cycle. 
+Aggregating instead by hour of the day, we see very similar activity levels across sex and education. Activity increases from the fifth hour to the tenth, where it gradually decreases until the twentieth hour, where it drops off steeply. This pattern is affirmed by humans' typically sleep cycle. Note that the graph below does not show all data points, as it has been rescaled for clarity. 
 
 ```{r}
 nhanes |> 
@@ -233,7 +240,9 @@ nhanes |>
   ggplot(aes(x = hour, y = hourly_activity, color = sex)) +
   facet_grid(.~education) +
   geom_point(alpha = 0.1) +
-  geom_smooth()
+  geom_smooth()+ 
+  scale_y_continuous(limits = c(0, 2000))+ 
+  labs(title = 'Hourly Acitivity by Education and Sex')
   
 ```
 
@@ -305,7 +314,8 @@ citi |>
   summarise(Median_Duration = median(duration)) |> 
   ggplot(aes(x = month, fill = weekdays, y = Median_Duration))+
   facet_grid(year ~ . ) +
-  geom_bar(position = 'dodge', stat = 'identity')
+  geom_bar(position = 'dodge', stat = 'identity')+ 
+  labs(title = 'Median Citibike Ride Duration')
 ```
 
 Next we investigate the effect of month, customer type, and bike type ride duration in 2024. Since very few rides are longer than 75 minutes, we filter for rides under 75 minutes long. We then create a four panel graph, faceting by customer type and month. We have used color to show the difference between each bike type. We have normalized each histogram. From the graph, we can see that electric bikes are used less than their human-powered counterparts across month and customer type. This could be due to the the persistent unavailability of electric bikes or consumer choice against electric bikes due to safety, cost, and docking concerns. 
@@ -314,8 +324,8 @@ citi |>
   filter(year == 2024, duration < 75) |> 
   ggplot(aes(x = duration, fill = rideable_type))+
   facet_grid(customer_type ~ month) +
-  geom_histogram(aes(y = ..density..)) 
-
+  geom_histogram(aes(y = ..density..)) + 
+  labs(title = '2024 Electric and Classic Bike Usage')
 ```
 
 
