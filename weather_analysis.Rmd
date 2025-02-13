@@ -1,21 +1,18 @@
 ---
-title: "Homework 3"
-author: "Wayne Monical wem2121"
+title: "Weather Analysis"
+author: "Wayne Monical"
 date: "2024-10-10"
 output: github_document
 ---
 
-## Problem 1
-
-```{r}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(p8105.datasets)
 data("ny_noaa")
 ```
 
 
-The `ny_noaa` data set has `r ncol(ny_noaa)` columns and `r nrow(ny_noaa)` rows. Each observation comes with an ID given by the `id` variable. Each observation has a date, along with several precipitation and temperature measurements. 
-
+This analysis uses data from the National Oceanic and Atmospheric Administration (NOAA) on the temperature and precipitation in NYC. The `ny_noaa` data set has `r ncol(ny_noaa)` columns and `r nrow(ny_noaa)` rows. Each observation comes with an ID given by the `id` variable. Each observation has a date, along with several precipitation and temperature measurements.
 
 
 We begin with data cleaning by creating separate numeric variables for year, month, and day. 
@@ -66,7 +63,7 @@ ny_noaa =
 ```
 
 
-However, even after correcting the units to millimeters, the daily precipitation, snowfall, and snow depth have overly large maximum values. The maximum snowfall for New York City was recorded as 693 millimeters on January 23, 2016 according to [this website](https://www.currentresults.com/Yearly-Weather/USA/NY/New-York-City/extreme-annual-new-york-city-snowfall.php). I do not see a clear cause of this issue. Errors in data collection, such as the negative snowfall variable, could be at fault. I would like to ask the data collector about these values. If I could not do that, I would simply discard any values over NYC's recorded maximum. 
+However, even after correcting the units to millimeters, the daily precipitation, snowfall, and snow depth have overly large maximum values. The maximum snowfall for New York City was recorded as 693 millimeters on January 23, 2016 according to [this website](https://www.currentresults.com/Yearly-Weather/USA/NY/New-York-City/extreme-annual-new-york-city-snowfall.php). I do not see a clear cause of this issue. Errors in data collection, such as the negative snowfall variable, could be at fault. To formally deal with these values, I would inquire to the data collector for more information. If I could not do that, I would simply discard any values over NYC's recorded maximum. 
 ```{r}
 ny_noaa |> 
   select(prcp, snow, snwd) |> 
@@ -129,11 +126,11 @@ ny_noaa |>
 ```
 
 
-## Problem 2
+## Activity Data
 
 ### Loading and Cleaning Data
 
-Here we load the NHANES acceleration data. The acceleration data comes in a wide format. We pivot the data to be longer in order to tidy it. We also transform the minute data to be numeric. We import the covariates data set and find that it is already tidy. 
+The next analysis uses the NHANES data on an obvserved cohort's daily activity. We begin by loading the data. The acceleration data comes in a wide format. We pivot the data to be longer in order to tidy it. We also transform the minute data to be numeric. We import the covariates data set and find that it is already tidy. 
 ```{r}
 accel = 
   read_csv('data/nhanes_accel.csv') |> 
@@ -245,9 +242,9 @@ nhanes |>
 ```
 
 
-## Problem 3
+## Citibike Data
 
-Loading Citibike data, we import the four data frames from each of the four months. We add additional variables specifying the year and month of data collection, then combine them all. We also rename the `customer_type` variable for clarity, and we set the month names and weekdays as ordered factors so that they appear in the order as expected during tabling and graphing.  
+Following the theme of activity, we next analyze NYC Citibike ride data. To load the Citibike data, we import the four data frames from each of the four months. We add additional variables specifying the year and month of data collection, then combine them all. We also rename the `customer_type` variable for clarity, and we set the month names and weekdays as ordered factors so that they appear in the order as expected during tabling and graphing.  
 
 ```{r}
 

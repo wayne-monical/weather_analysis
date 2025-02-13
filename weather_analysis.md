@@ -1,31 +1,11 @@
-Homework 3
+Weather Analysis
 ================
-Wayne Monical wem2121
+Wayne Monical
 2024-10-10
 
-## Problem 1
-
-``` r
-library(tidyverse)
-```
-
-    ## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-    ## ✔ dplyr     1.1.4     ✔ readr     2.1.5
-    ## ✔ forcats   1.0.0     ✔ stringr   1.5.1
-    ## ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
-    ## ✔ lubridate 1.9.3     ✔ tidyr     1.3.1
-    ## ✔ purrr     1.0.2     
-    ## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-    ## ✖ dplyr::filter() masks stats::filter()
-    ## ✖ dplyr::lag()    masks stats::lag()
-    ## ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
-
-``` r
-library(p8105.datasets)
-data("ny_noaa")
-```
-
-The `ny_noaa` data set has 7 columns and 2595176 rows. Each observation
+This analysis uses data from the National Oceanic and Atmospheric
+Administration (NOAA) on the temperature and precipitation in NYC. The
+`ny_noaa` data set has 7 columns and 2595176 rows. Each observation
 comes with an ID given by the `id` variable. Each observation has a
 date, along with several precipitation and temperature measurements.
 
@@ -106,9 +86,10 @@ values. The maximum snowfall for New York City was recorded as 693
 millimeters on January 23, 2016 according to [this
 website](https://www.currentresults.com/Yearly-Weather/USA/NY/New-York-City/extreme-annual-new-york-city-snowfall.php).
 I do not see a clear cause of this issue. Errors in data collection,
-such as the negative snowfall variable, could be at fault. I would like
-to ask the data collector about these values. If I could not do that, I
-would simply discard any values over NYC’s recorded maximum.
+such as the negative snowfall variable, could be at fault. To formally
+deal with these values, I would inquire to the data collector for more
+information. If I could not do that, I would simply discard any values
+over NYC’s recorded maximum.
 
 ``` r
 ny_noaa |> 
@@ -163,7 +144,7 @@ ny_noaa |>
   ylab('Maximum Daily Temperature')
 ```
 
-![](p8105_hw3_wem2121_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](weather_analysis_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
 The next graph is a histogram faceted based on temperature statistic:
 minimum or maximum. It allows us to compare the two populations, but we
@@ -187,7 +168,7 @@ ny_noaa |>
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](p8105_hw3_wem2121_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](weather_analysis_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 Next we create a plot showing the distribution of snowfall values
 greater than 0 millimeters and less than 100 millimeters in yeas of 2001
@@ -210,16 +191,17 @@ ny_noaa |>
   ylab('Count of Observations')
 ```
 
-![](p8105_hw3_wem2121_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](weather_analysis_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
-## Problem 2
+## Activity Data
 
 ### Loading and Cleaning Data
 
-Here we load the NHANES acceleration data. The acceleration data comes
-in a wide format. We pivot the data to be longer in order to tidy it. We
-also transform the minute data to be numeric. We import the covariates
-data set and find that it is already tidy.
+The next analysis uses the NHANES data on an obvserved cohort’s daily
+activity. We begin by loading the data. The acceleration data comes in a
+wide format. We pivot the data to be longer in order to tidy it. We also
+transform the minute data to be numeric. We import the covariates data
+set and find that it is already tidy.
 
 ``` r
 accel = 
@@ -364,7 +346,7 @@ nhanes |>
     ## using the `.groups` argument.
     ## `geom_smooth()` using method = 'loess' and formula = 'y ~ x'
 
-![](p8105_hw3_wem2121_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+![](weather_analysis_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
 
 Aggregating instead by hour of the day, we see very similar activity
 levels across sex and education. Activity increases from the fifth hour
@@ -400,13 +382,14 @@ nhanes |>
     ## Warning: Removed 43 rows containing missing values or values outside the scale range
     ## (`geom_point()`).
 
-![](p8105_hw3_wem2121_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](weather_analysis_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
-## Problem 3
+## Citibike Data
 
-Loading Citibike data, we import the four data frames from each of the
-four months. We add additional variables specifying the year and month
-of data collection, then combine them all. We also rename the
+Following the theme of activity, we next analyze NYC Citibike ride data.
+To load the Citibike data, we import the four data frames from each of
+the four months. We add additional variables specifying the year and
+month of data collection, then combine them all. We also rename the
 `customer_type` variable for clarity, and we set the month names and
 weekdays as ordered factors so that they appear in the order as expected
 during tabling and graphing.
@@ -513,7 +496,7 @@ citi |>
     ## `summarise()` has grouped output by 'weekdays', 'month'. You can override using
     ## the `.groups` argument.
 
-![](p8105_hw3_wem2121_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+![](weather_analysis_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
 
 Next we investigate the effect of month, customer type, and bike type
 ride duration in 2024. Since very few rides are longer than 75 minutes,
@@ -543,4 +526,4 @@ citi |>
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](p8105_hw3_wem2121_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+![](weather_analysis_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
